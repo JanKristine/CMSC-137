@@ -38,24 +38,63 @@ def listen_for_client(cs):
             # if we received a message, replace the <SEP> 
             # token with ": " for nice printing
             msg = msg.replace(separator_token, ": ")
+            # checks if any element is present in the list
+            if len(msg_list) == 2:
+                del msg_list[:2]
             msg_list.append(msg)
-            print("msg_list: ",msg_list) # will remove i just wanted to see what it would output
+            print("msglist: ", msg_list)
 
         # iterate over all connected sockets
         for client_socket in client_sockets:
             # and send the message
             client_socket.send(msg.encode())
 
-
         # trying to split the list into dictionary to know which player wins 
         if len(msg_list) == 2:
-            print(msg_list)
             name_list, value_list = zip(*(s.split(": ") for s in msg_list))
-            print(name_list)
-            print(value_list)
+            players_dict = dict(zip(name_list,value_list))
+            player_values = []
+            for k,v in players_dict.items():
+                player_values.append(players_dict[k])
+            print(player_values)    # ['R\x1b[39m', 'S\x1b[39m']
+
+            slicing = slice(1)
+            for i in range(len(player_values)):
+                val = player_values[i]
+                player_values[i] = val[slicing]
+            print(player_values) # ['R', 'S']
+
+                # val = i[slicing]
+                # values_list.append(val)
+                # print(i)
+            # print(values_list)
+
+            for i in range(len(player_values)-1):
+                if ((player_values[i] == "R") and (player_values[i+1] == "S")) or ((player_values[i] == "S") and (player_values[i+1] == "P")) or ((player_values[i] == "P") and (player_values[i+1] == "R")):
+                    msg = b"PLAYER 1 receives 1 point.\nPLAYER 2 receives no points.\n\nPLAYER 1's turn"
+                    # shows the message in both client sides
+                    for client_socket in client_sockets:
+                        client_socket.send(msg)
+                
+                elif ((player_values[i] == "S") and (player_values[i+1] == "R")) or ((player_values[i] == "P") and (player_values[i+1] == "S")) or ((player_values[i] == "R") and (player_values[i+1] == "P")):
+                    msg = b"PLAYER 1 receives no points.\nPLAYER 2 receives 1 point.\n\nPLAYER 1's turn"
+                    # shows the message in both client sides
+                    for client_socket in client_sockets:
+                        client_socket.send(msg)
+
+                elif ((player_values[i] == "S") and (player_values[i+1] == "S")) or ((player_values[i] == "P") and (player_values[i+1] == "P")) or ((player_values[i] == "R") and (player_values[i+1] == "R")):
+                    msg = b"Both players receive 0.5 points.\n\nPLAYER 1's turn"
+                    # shows the message in both client sides
+                    for client_socket in client_sockets:
+                        client_socket.send(msg)
 
 
-
+            # print(name_list) # ('\x1b[34mJen', '\x1b[33mHan')
+            # for i in name_list:
+            #     print(i)
+            # for i in value_list:
+            #     print(i)
+            # print(value_list) # ('R\x1b[39'. 'S\x1b[39')
 
 
 while True:
@@ -67,11 +106,13 @@ while True:
     # finds the length of the set client_socket
     set_length = len(client_sockets)
     if set_length < 2:
-        msg = b"There must be two players to start the game.\n"
+        msg = b"You are PLAYER 1.\nPlease wait for the next player to join."
         client_socket.send(msg)
         # wait for the second player to connect
         time.sleep(10)
     elif set_length == 2:
+        msg = b"You are PLAYER 2.\n"      #the problem here is that if i put these two lines the program cant read the second player's convo
+        client_socket.send(msg)
         msg = b"**Two players connected**\n\nPlayers must type one one of the input keys [R], [P], [S].\n"
         # shows the message in both client sides
         for cs in client_sockets:
