@@ -20,8 +20,6 @@ s.listen(5)
 print(f"[*] Listening as {SERVER_HOST}:{SERVER_PORT}")
 msg_list = []
 
-
-
 def listen_for_client(cs):
     player1_counter = 0
     player2_counter = 0
@@ -72,7 +70,6 @@ def listen_for_client(cs):
                 if ((player_values[i] == "R") and (player_values[i+1] == "S")) or ((player_values[i] == "S") and (player_values[i+1] == "P")) or ((player_values[i] == "P") and (player_values[i+1] == "R")):
                     msg = b"PLAYER 1 receives 1 point.\nPLAYER 2 receives no points.\n"
                     show_msg(msg)
-                    # shows the message in both client sides
                     player1_counter += 1
                     check_score(player1_counter, player2_counter)
                     msg = b"PLAYER 1's turn"
@@ -109,7 +106,6 @@ def check_score(player1_counter, player2_counter):
 def show_msg(msg):
     for client_socket in client_sockets:
         client_socket.send(msg)
-
 
 while True:
     # we keep listening for new connections all the time
