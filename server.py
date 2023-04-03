@@ -20,7 +20,11 @@ s.listen(5)
 print(f"[*] Listening as {SERVER_HOST}:{SERVER_PORT}")
 msg_list = []
 
+
+
 def listen_for_client(cs):
+    player1_counter = 0
+    player2_counter = 0
     """
     This function keep listening for a message from `cs` socket
     Whenever a message is received, broadcast it to all other connected clients
@@ -63,38 +67,39 @@ def listen_for_client(cs):
                 val = player_values[i]
                 player_values[i] = val[slicing]
             print(player_values) # ['R', 'S']
-
-                # val = i[slicing]
-                # values_list.append(val)
-                # print(i)
-            # print(values_list)
-
+            
             for i in range(len(player_values)-1):
                 if ((player_values[i] == "R") and (player_values[i+1] == "S")) or ((player_values[i] == "S") and (player_values[i+1] == "P")) or ((player_values[i] == "P") and (player_values[i+1] == "R")):
                     msg = b"PLAYER 1 receives 1 point.\nPLAYER 2 receives no points.\n\nPLAYER 1's turn"
                     # shows the message in both client sides
+                    player1_counter += 1
                     for client_socket in client_sockets:
                         client_socket.send(msg)
                 
                 elif ((player_values[i] == "S") and (player_values[i+1] == "R")) or ((player_values[i] == "P") and (player_values[i+1] == "S")) or ((player_values[i] == "R") and (player_values[i+1] == "P")):
                     msg = b"PLAYER 1 receives no points.\nPLAYER 2 receives 1 point.\n\nPLAYER 1's turn"
+                    player2_counter += 1
                     # shows the message in both client sides
                     for client_socket in client_sockets:
                         client_socket.send(msg)
 
                 elif ((player_values[i] == "S") and (player_values[i+1] == "S")) or ((player_values[i] == "P") and (player_values[i+1] == "P")) or ((player_values[i] == "R") and (player_values[i+1] == "R")):
                     msg = b"Both players receive 0.5 points.\n\nPLAYER 1's turn"
+                    player1_counter += 0.5
+                    player2_counter += 0.5
                     # shows the message in both client sides
                     for client_socket in client_sockets:
                         client_socket.send(msg)
-
-
-            # print(name_list) # ('\x1b[34mJen', '\x1b[33mHan')
-            # for i in name_list:
-            #     print(i)
-            # for i in value_list:
-            #     print(i)
-            # print(value_list) # ('R\x1b[39'. 'S\x1b[39')
+            
+            # checks the score of each player
+            if (player1_counter >= 3):
+                msg = b"PLAYER 1 WINS!"
+                for client_socket in client_sockets:
+                        client_socket.send(msg)
+            elif (player2_counter >= 3):
+                msg = b"PLAYER 2 WINS!"
+                for client_socket in client_sockets:
+                        client_socket.send(msg)
 
 
 while True:
@@ -111,7 +116,7 @@ while True:
         # wait for the second player to connect
         time.sleep(10)
     elif set_length == 2:
-        msg = b"You are PLAYER 2.\n"      #the problem here is that if i put these two lines the program cant read the second player's convo
+        msg = b"You are PLAYER 2.\n"     
         client_socket.send(msg)
         msg = b"**Two players connected**\n\nPlayers must type one one of the input keys [R], [P], [S].\n"
         # shows the message in both client sides
