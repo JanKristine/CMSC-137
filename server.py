@@ -70,36 +70,45 @@ def listen_for_client(cs):
             
             for i in range(len(player_values)-1):
                 if ((player_values[i] == "R") and (player_values[i+1] == "S")) or ((player_values[i] == "S") and (player_values[i+1] == "P")) or ((player_values[i] == "P") and (player_values[i+1] == "R")):
-                    msg = b"PLAYER 1 receives 1 point.\nPLAYER 2 receives no points.\n\nPLAYER 1's turn"
+                    msg = b"PLAYER 1 receives 1 point.\nPLAYER 2 receives no points.\n"
+                    show_msg(msg)
                     # shows the message in both client sides
                     player1_counter += 1
-                    for client_socket in client_sockets:
-                        client_socket.send(msg)
-                
+                    check_score(player1_counter, player2_counter)
+                    msg = b"PLAYER 1's turn"
+                    show_msg(msg)
+                    
                 elif ((player_values[i] == "S") and (player_values[i+1] == "R")) or ((player_values[i] == "P") and (player_values[i+1] == "S")) or ((player_values[i] == "R") and (player_values[i+1] == "P")):
-                    msg = b"PLAYER 1 receives no points.\nPLAYER 2 receives 1 point.\n\nPLAYER 1's turn"
+                    msg = b"PLAYER 1 receives no points.\nPLAYER 2 receives 1 point.\n"
+                    show_msg(msg)
                     player2_counter += 1
-                    # shows the message in both client sides
-                    for client_socket in client_sockets:
-                        client_socket.send(msg)
+                    check_score(player1_counter, player2_counter)
+                    msg = b"PLAYER 1's turn"
+                    show_msg(msg)
 
                 elif ((player_values[i] == "S") and (player_values[i+1] == "S")) or ((player_values[i] == "P") and (player_values[i+1] == "P")) or ((player_values[i] == "R") and (player_values[i+1] == "R")):
-                    msg = b"Both players receive 0.5 points.\n\nPLAYER 1's turn"
+                    msg = b"Both players receive 0.5 points.\n"
+                    show_msg(msg)
                     player1_counter += 0.5
                     player2_counter += 0.5
-                    # shows the message in both client sides
-                    for client_socket in client_sockets:
-                        client_socket.send(msg)
+                    check_score(player1_counter, player2_counter)
+                    msg = b"PLAYER 1's turn"
+                    show_msg(msg)
             
-            # checks the score of each player
-            if (player1_counter >= 3):
-                msg = b"PLAYER 1 WINS!"
-                for client_socket in client_sockets:
-                        client_socket.send(msg)
-            elif (player2_counter >= 3):
-                msg = b"PLAYER 2 WINS!"
-                for client_socket in client_sockets:
-                        client_socket.send(msg)
+
+def check_score(player1_counter, player2_counter):
+    if (player1_counter >= 3):
+        msg = b"PLAYER 1 WINS!"
+        show_msg(msg)
+        exit()
+    elif (player2_counter >= 3):
+        msg = b"PLAYER 2 WINS!"
+        show_msg(msg)
+        exit()
+                        
+def show_msg(msg):
+    for client_socket in client_sockets:
+        client_socket.send(msg)
 
 
 while True:
